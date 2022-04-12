@@ -5,9 +5,10 @@
 
 # Built-in
 import tkinter
-from PIL import Image
 from _thread import start_new_thread
 from tkinter import ttk, messagebox, filedialog
+
+from PIL import Image
 
 
 class Gui:
