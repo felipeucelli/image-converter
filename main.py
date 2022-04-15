@@ -14,7 +14,7 @@ from PIL import Image
 class Gui:
     def __init__(self):
         self.root = tkinter.Tk()
-        self.root.title('Imagem Converter')
+        self.root.title('Image Converter')
         self.root.geometry('750x395')
         self.root.resizable(False, False)
 
@@ -180,6 +180,10 @@ class Gui:
         self.btn_stop_convert['text'] = 'STOP'
 
     def add_file(self):
+        """
+        Opens a box to select files, and inserts the files into a listbox
+        :return:
+        """
         files = filedialog.askopenfilenames(filetypes=(('all files', '*.*'),))
         if files != '' and files != ():
             self.change_interface_status('normal')
@@ -188,6 +192,11 @@ class Gui:
                 self.list_box_files.insert('end', file)
 
     def _thread_convert_file(self, *args):
+        """
+        Conversion function
+        :param args: None
+        :return:
+        """
         _none = args
         if self.variable_out_file.get() == 0:
             messagebox.showerror('Error', 'Please, Select a Output File')
@@ -195,13 +204,16 @@ class Gui:
             save_path = filedialog.askdirectory()
             if save_path != '' and save_path != ():
                 self.start_conversion()
+
                 out_file = self.format_files[self.variable_out_file.get()]['outfile']
                 chanel = self.format_files[self.variable_out_file.get()]['chanel']
-                for pos, file in enumerate(self.file_path):
+
+                for pos, file in enumerate(self.file_path):  # Cycle through the list of paths
                     self.list_box_files.itemconfig(pos, fg='gray')
                     try:
                         img = Image.open(file).convert(chanel)
                         img.save(file.replace(f'.{self.get_extension(file)}', f'.{out_file}'), out_file)
+                        img.close()
                     except (KeyError, IOError):
                         self.list_box_files.itemconfig(pos, fg='red')
                     else:
@@ -213,18 +225,26 @@ class Gui:
                 self.conversion_finished()
 
     def convert_file(self):
+        """
+        Start a new thread for the conversion
+        :return:
+        """
         start_new_thread(self._thread_convert_file, (None, None))
 
     @staticmethod
-    def get_extension(file_name: str) -> str:
+    def get_extension(file_path: str) -> str:
         """
         Get the file extension
-        :param file_name: file_name
+        :param file_path: file_path
         :return: file extension
         """
-        return file_name.split('.')[-1]
+        return file_path.split('.')[-1]
 
     def start_gui(self):
+        """
+        Start tkinter mainloop
+        :return:
+        """
         self.root.mainloop()
 
 
