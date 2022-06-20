@@ -5,6 +5,7 @@
 
 # Built-in
 import tkinter
+from os.path import basename
 from _thread import start_new_thread
 from tkinter import ttk, messagebox, filedialog
 
@@ -205,14 +206,17 @@ class Gui:
             if save_path != '' and save_path != ():
                 self.start_conversion()
 
-                out_file = self.format_files[self.variable_out_file.get()]['outfile']
+                out_file_format = self.format_files[self.variable_out_file.get()]['outfile']
                 chanel = self.format_files[self.variable_out_file.get()]['chanel']
 
                 for pos, file in enumerate(self.file_path):  # Cycle through the list of paths
                     self.list_box_files.itemconfig(pos, fg='gray')
+                    file_name = self.get_file_name(file)
+                    file_name = file_name.replace(f'.{self.get_extension(file_name)}', f'.{out_file_format}')
+                    out_file = f"{save_path}/{file_name}"
                     try:
                         img = Image.open(file).convert(chanel)
-                        img.save(file.replace(f'.{self.get_extension(file)}', f'.{out_file}'), out_file)
+                        img.save(out_file, out_file_format)
                         img.close()
                     except (KeyError, IOError):
                         self.list_box_files.itemconfig(pos, fg='red')
@@ -230,6 +234,15 @@ class Gui:
         :return:
         """
         start_new_thread(self._thread_convert_file, (None, None))
+
+    @staticmethod
+    def get_file_name(path: str) -> str:
+        """
+        Get the file name in the path
+        :param path: full file path
+        :return: file name
+        """
+        return basename(path)
 
     @staticmethod
     def get_extension(file_path: str) -> str:
