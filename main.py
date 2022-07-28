@@ -9,7 +9,7 @@ from os.path import basename
 from _thread import start_new_thread
 from tkinter import ttk, messagebox, filedialog
 
-from PIL import Image
+from PIL import Image, ImageChops
 
 
 class Gui:
@@ -35,6 +35,8 @@ class Gui:
             }
         }
 
+        self.filter = ('NONE', 'GREY SCALE', 'INVERT COLORS',  'INVERT AND CONVERT TO GRAY')
+
         self.style_root = ttk.Style(self.root)
         self.style_root.configure('TButton', font=('Arial', 15))
         self.style_root.configure('btn.TButton', font=('Arial', 10))
@@ -43,6 +45,8 @@ class Gui:
         self.style_root.map('btn_start_convert.TButton', foreground=[('!disabled', 'green'), ('disabled', 'grey')])
 
         self._interface()
+
+        self.combo_filter['values'] = self.filter
 
     def _interface(self):
         """
@@ -62,14 +66,19 @@ class Gui:
         self.btn_add = ttk.Button(self.frame_add, text='ADD FILE', command=self.add_file)
         self.btn_add.pack(pady=15, padx=15, side='left')
 
-        self.radio_bnt_mp3 = ttk.Radiobutton(self.frame_add, text='PNG', variable=self.variable_out_file, value=1)
-        self.radio_bnt_mp3.pack(side='right', padx=15)
+        self.radio_bnt_png = ttk.Radiobutton(self.frame_add, text='PNG', variable=self.variable_out_file, value=1)
+        self.radio_bnt_png.pack(side='right', padx=15)
 
-        self.radio_bnt_mp4 = ttk.Radiobutton(self.frame_add, text='JPEG', variable=self.variable_out_file, value=2)
-        self.radio_bnt_mp4.pack(side='right', padx=15)
+        self.radio_bnt_jpeg = ttk.Radiobutton(self.frame_add, text='JPEG', variable=self.variable_out_file, value=2)
+        self.radio_bnt_jpeg.pack(side='right', padx=15)
 
         self.label_out_file = tkinter.Label(self.frame_add, font='arial 12', text='OUTPUT: ')
         self.label_out_file.pack(side='right', padx=15)
+
+        self.label_combo_filter = tkinter.Label(self.frame_add, text='FILTER:', font='Arial 12')
+        self.label_combo_filter.pack()
+        self.combo_filter = ttk.Combobox(self.frame_add, state='readonly', font='Arial 12')
+        self.combo_filter.pack()
 
         # Frame listbox
         self.frame_list_box = tkinter.Frame(self.frame_convert, width=540, height=200)
@@ -116,8 +125,8 @@ class Gui:
         :return:
         """
         self.btn_add['state'] = status
-        self.radio_bnt_mp4['state'] = status
-        self.radio_bnt_mp3['state'] = status
+        self.radio_bnt_jpeg['state'] = status
+        self.radio_bnt_png['state'] = status
         self.btn_start_convert['state'] = status
         self.btn_remove['state'] = status
         self.btn_clear['state'] = status
@@ -215,7 +224,9 @@ class Gui:
                     file_name = file_name.replace(f'.{self.get_extension(file_name)}', f'.{out_file_format}')
                     out_file = f"{save_path}/{file_name}"
                     try:
-                        img = Image.open(file).convert(chanel)
+                        img = Image.open(file)
+                        img = self.insert_filter(img, self.combo_filter)
+                        img.convert(chanel)
                         img.save(out_file, out_file_format)
                         img.close()
                     except (KeyError, IOError):
@@ -234,6 +245,24 @@ class Gui:
         :return:
         """
         start_new_thread(self._thread_convert_file, (None, None))
+
+    @staticmethod
+    def insert_filter(img, selected):
+        """
+        Function responsible for inserting filters
+        :param img: Image to be converted
+        :param selected: Filter combobox
+        :return: Returns the converted image
+        """
+        if selected.get() != 'NONE' and selected.get() != '':
+            if selected.get() == 'GREY SCALE':
+                return img.convert('L')
+            elif selected.get() == 'INVERT COLORS':
+                return ImageChops.invert(img)
+            elif selected.get() == 'INVERT AND CONVERT TO GRAY':
+                return ImageChops.invert(img.convert('L'))
+        else:
+            return img
 
     @staticmethod
     def get_file_name(path: str) -> str:
