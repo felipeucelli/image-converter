@@ -35,7 +35,12 @@ class Gui:
             }
         }
 
-        self.filter = ('NONE', 'GREY SCALE', 'INVERT COLORS',  'INVERT AND CONVERT TO GRAY')
+        self.filter = {
+            'NONE': lambda command: command,
+            'GREY SCALE': lambda command: command.convert('L'),
+            'INVERT COLORS': lambda command: ImageChops.invert(command),
+            'INVERT AND CONVERT TO GRAY': lambda command: ImageChops.invert(command.convert('L'))
+        }
 
         self.style_root = ttk.Style(self.root)
         self.style_root.configure('TButton', font=('Arial', 15))
@@ -46,7 +51,10 @@ class Gui:
 
         self._interface()
 
-        self.combo_filter['values'] = self.filter
+        filters = []
+        for item in self.filter.items():
+            filters.append(item[0])
+        self.combo_filter['values'] = filters
 
     def _interface(self):
         """
@@ -225,7 +233,7 @@ class Gui:
                     out_file = f"{save_path}/{file_name}"
                     try:
                         img = Image.open(file)
-                        img = self.insert_filter(img, self.combo_filter)
+                        img = self.insert_filter(img, self.combo_filter, self.filter)
                         img.convert(chanel)
                         img.save(out_file, out_file_format)
                         img.close()
@@ -247,22 +255,15 @@ class Gui:
         start_new_thread(self._thread_convert_file, (None, None))
 
     @staticmethod
-    def insert_filter(img, selected):
+    def insert_filter(img, selected, filters: dict):
         """
         Function responsible for inserting filters
+        :param filters:
         :param img: Image to be converted
         :param selected: Filter combobox
         :return: Returns the converted image
         """
-        if selected.get() != 'NONE' and selected.get() != '':
-            if selected.get() == 'GREY SCALE':
-                return img.convert('L')
-            elif selected.get() == 'INVERT COLORS':
-                return ImageChops.invert(img)
-            elif selected.get() == 'INVERT AND CONVERT TO GRAY':
-                return ImageChops.invert(img.convert('L'))
-        else:
-            return img
+        return filters[selected.get()](img)
 
     @staticmethod
     def get_file_name(path: str) -> str:
