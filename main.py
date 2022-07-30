@@ -143,6 +143,7 @@ class Gui:
         :return:
         """
         self.btn_add['state'] = status
+        self.combo_filter['state'] = status
         self.radio_bnt_jpeg['state'] = status
         self.radio_bnt_png['state'] = status
         self.btn_start_convert['state'] = status
