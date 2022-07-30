@@ -9,7 +9,7 @@ from os.path import basename
 from _thread import start_new_thread
 from tkinter import ttk, messagebox, filedialog
 
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageFilter
 
 
 class Gui:
@@ -39,7 +39,17 @@ class Gui:
             'NONE': lambda command: command,
             'GREY SCALE': lambda command: command.convert('L'),
             'INVERT COLORS': lambda command: ImageChops.invert(command),
-            'INVERT AND CONVERT TO GRAY': lambda command: ImageChops.invert(command.convert('L'))
+            'INVERT AND CONVERT TO GRAY': lambda command: ImageChops.invert(command.convert('L')),
+            'BLUR': lambda command: command.filter(ImageFilter.BLUR),
+            'CONTOUR': lambda command: command.filter(ImageFilter.CONTOUR),
+            'DETAIL': lambda command: command.filter(ImageFilter.DETAIL),
+            'EDGE ENHANCE': lambda command: command.filter(ImageFilter.EDGE_ENHANCE),
+            'EDGE ENHANCE MORE': lambda command: command.filter(ImageFilter.EDGE_ENHANCE_MORE),
+            'EMBOSS': lambda command: command.filter(ImageFilter.EMBOSS),
+            'FIND EDGES': lambda command: command.filter(ImageFilter.FIND_EDGES),
+            'SMOOTH': lambda command: command.filter(ImageFilter.SMOOTH),
+            'SMOOTH MORE': lambda command: command.filter(ImageFilter.SMOOTH_MORE),
+            'SHARPEN': lambda command: command.filter(ImageFilter.SHARPEN)
         }
 
         self.style_root = ttk.Style(self.root)
