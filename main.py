@@ -65,6 +65,7 @@ class Gui:
         for item in self.filter.items():
             filters.append(item[0])
         self.combo_filter['values'] = filters
+        self.combo_filter.current(0)
 
     def _interface(self):
         """
