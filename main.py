@@ -9,6 +9,7 @@ from os.path import basename
 from _thread import start_new_thread
 from tkinter import ttk, messagebox, filedialog
 
+import pillow_avif
 from PIL import Image, ImageChops, ImageFilter
 
 
